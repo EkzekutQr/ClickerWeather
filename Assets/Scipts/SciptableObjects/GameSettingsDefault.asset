@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GameSettingsDefault
   m_EditorClassIdentifier: 
   initialEnergy: 1000
-  energyPerInterval: 1
+  energyPerInterval: 10
   maxEnergy: 1000
   currencyPerClick: 1
   energyCostPerClick: 1

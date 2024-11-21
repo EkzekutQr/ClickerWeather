@@ -7,13 +7,17 @@ public class TabController : MonoBehaviour
 {
     private TabModel _model;
     private TabView _view;
+    private WeatherController _weatherController;
+    private FactsController _factsController;
     public bool IsSwitchingTabs { get; private set; }
 
     [Inject]
-    public void Construct(TabModel model, TabView view)
+    public void Construct(TabModel model, TabView view, WeatherController weatherController, FactsController factsController)
     {
         _model = model;
         _view = view;
+        _weatherController = weatherController;
+        _factsController = factsController;
     }
 
     private void Start()
@@ -39,5 +43,16 @@ public class TabController : MonoBehaviour
         await _view.PlayFadeInAnimation();
         _view.SetButtonsInteractable(true);
         IsSwitchingTabs = false;
+
+        if (tabName == "Clicker")
+        {
+            _weatherController.SetClickerScreenActive(true);
+            _factsController.OnFactsTabSelected();
+        }
+        else
+        {
+            _weatherController.SetClickerScreenActive(false);
+            _factsController.OnFactsTabSelected();
+        }
     }
 }
