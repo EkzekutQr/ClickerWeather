@@ -4,17 +4,19 @@ using UniRx;
 using Zenject;
 using DG.Tweening;
 
-public class ClickerButton : MonoBehaviour
+public class ClickerView : MonoBehaviour
 {
     [SerializeField] private Button clickButton;
     [SerializeField] private ParticleSystem clickParticles;
     [SerializeField] private Transform coinPrefab;
     [SerializeField] private Transform currencyFlyTarget;
+    [SerializeField] private TMPro.TextMeshProUGUI currencyText;
+    [SerializeField] private TMPro.TextMeshProUGUI energyText;
 
-    private IClickerController _clickerController;
+    private ClickerController _clickerController;
 
     [Inject]
-    public void Construct(IClickerController clickerController)
+    public void Construct(ClickerController clickerController)
     {
         _clickerController = clickerController;
     }
@@ -24,13 +26,19 @@ public class ClickerButton : MonoBehaviour
         clickButton.OnClickAsObservable()
         .Subscribe(_ => _clickerController.OnClick())
         .AddTo(this);
+
+        _clickerController.Currency
+        .Subscribe(value => currencyText.text = $"Currency: {value}")
+        .AddTo(this);
+
+        _clickerController.Energy
+        .Subscribe(value => energyText.text = $"Energy: {value}")
+        .AddTo(this);
     }
 
     public void PlayClickVFX()
     {
-        if (clickParticles == null) return;
-
-        clickParticles.Play();
+        clickParticles?.Play();
     }
 
     public void SpawnCoin()
