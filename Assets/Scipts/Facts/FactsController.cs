@@ -4,6 +4,7 @@ using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using Zenject;
 using System.Threading;
+using UnityEngine;
 
 public class FactsController
 {
@@ -40,7 +41,13 @@ public class FactsController
             _factsModel.Facts.Clear();
             foreach (var fact in factsData)
             {
-                _factsModel.Facts.Add(fact["name"].Value<string>());
+                var factName = fact["name"]?.Value<string>();
+                var factId = fact["id"]?.Value<int>();
+
+                if (!string.IsNullOrEmpty(factName) && factId.HasValue)
+                {
+                    _factsModel.Facts.Add(new Fact { Name = factName, Id = factId.Value });
+                }
             }
         }
         _factsView.ShowLoadingIndicator(false);
@@ -61,10 +68,24 @@ public class FactsController
         using (var client = new HttpClient())
         {
             var response = await client.GetStringAsync($"https://api.thedogapi.com/v1/breeds/{factId}");
+            Debug.Log(response);
             var factDetails = JObject.Parse(response);
 
-            _factsModel.SelectedFactDetails.Value = factDetails["description"].Value<string>();
+            var name = factDetails["name"]?.Value<string>();
+            var bredFor = factDetails["bred_for"]?.Value<string>();
+            var lifeSpan = factDetails["life_span"]?.Value<string>();
+            var temperament = factDetails["temperament"]?.Value<string>();
+
+            var title = $"Name: { name}";
+            var details = $"Bred For: {bredFor}\nLife Span: {lifeSpan}\nTemperament: {temperament}";
+            _factsModel.SelectedFactTitle.Value = title;
+            _factsModel.SelectedFactDetails.Value = details;
         }
         _factsView.ShowLoadingIndicator(false);
     }
+}
+public class Fact
+{
+    public string Name { get; set; }
+    public int Id { get; set; }
 }

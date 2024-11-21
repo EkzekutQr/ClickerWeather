@@ -10,7 +10,8 @@ public class FactsView : MonoBehaviour
     [SerializeField] private GameObject factItemPrefab;
     [SerializeField] private GameObject loadingIndicator;
     [SerializeField] private GameObject factDetailsPopup;
-    [SerializeField] private TMPro.TextMeshProUGUI factDetailsPopupText;
+    [SerializeField] private TMPro.TextMeshProUGUI factDetailsPopupTextTitle;
+    [SerializeField] private TMPro.TextMeshProUGUI factDetailsPopupTextBody;
 
     private FactsModel _factsModel;
     private FactsController _factsController;
@@ -25,20 +26,25 @@ public class FactsView : MonoBehaviour
     private void Start()
     {
         _factsModel.Facts.ObserveAdd()
-        .Subscribe(fact => AddFactItem(fact.Value, fact.Index))
+        .Subscribe(fact => AddFactItem(fact.Value.Name, fact.Value.Id))
         .AddTo(this);
 
         _factsModel.SelectedFactDetails
         .Subscribe(details => ShowFactDetailsPopup(details))
         .AddTo(this);
+
+        _factsModel.SelectedFactTitle
+        .Subscribe(details => ShowFactDetailsPopupTitle(details))
+        .AddTo(this);
     }
 
-    private void AddFactItem(string fact, int index)
+    private void AddFactItem(string factName, int factId)
     {
         var factItem = Instantiate(factItemPrefab, factsListContainer);
-        factItem.GetComponentInChildren<TMPro.TextMeshProUGUI>().text = $"{index + 1} - {fact}";
+        factItem.GetComponent<FactItem>().FactName.text = factName;
+        factItem.GetComponent<FactItem>().FactId.text = factId.ToString();
         factItem.GetComponent<Button>().OnClickAsObservable()
-        .Subscribe(_ => OnFactSelected(index))
+        .Subscribe(_ => OnFactSelected(factId))
         .AddTo(this);
     }
 
@@ -54,7 +60,13 @@ public class FactsView : MonoBehaviour
 
     private void ShowFactDetailsPopup(string details)
     {
-        factDetailsPopupText.text = details;
+        factDetailsPopupTextBody.text = details;
+        factDetailsPopup.SetActive(true);
+    }
+
+    private void ShowFactDetailsPopupTitle(string details)
+    {
+        factDetailsPopupTextTitle.text = details;
         factDetailsPopup.SetActive(true);
     }
 
